@@ -1,0 +1,24 @@
+import spidev
+import time
+spi = spidev.SpiDev()
+spi.open(0,0)
+
+def ReadChannel(channel):
+  adc = spi.xfer2([1,(8+channel)<<4,0])
+  data = ((adc[1]&3) << 8) + adc[2]
+  return data
+
+def ConvertVolts(data,places):
+  volts = (data * 3.3)*100 / float(1023)
+  volts = round(volts,places)
+  return volts
+
+while True:
+  temp_level = ReadChannel(0)
+  temp = ConvertVolts(temp_level,2)
+  print ("TEMP: ",temp)
+  time.sleep(1)
+  moisture_level = ReadChannel(0)
+  moisture = ConvertVolts(moisture_level,2)
+  print ("MOISTURE: ",moisture)
+  time.sleep(1)
